@@ -1,7 +1,6 @@
 import os
 import subprocess
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from pynput import keyboard
 import sys
 import time
 
@@ -104,28 +103,26 @@ def main():
             else:
                 print("  ", option)
 
-    def on_press(key):
+    def on_input():
         nonlocal selected_index
-        if key == keyboard.Key.up:
-            selected_index = (selected_index - 1) % len(menu_options)  # Move up
-        elif key == keyboard.Key.down:
-            selected_index = (selected_index + 1) % len(menu_options)  # Move down
-        elif key == keyboard.Key.enter:
-            if selected_index == 0:
+        print("\nUse the number to select an option:")
+        try:
+            selection = int(input("\nEnter your choice (1-3): ").strip())
+            if selection == 1:
                 download_camphish()
-            elif selected_index == 1:
+            elif selection == 2:
                 download_zphisher()
-            elif selected_index == 2:
+            elif selection == 3:
                 start_cookie_logger()
-            return False  # Stops the listener after a selection
+            else:
+                print("[!] Invalid selection.")
+                on_input()  # Recurse to prompt again
+        except ValueError:
+            print("[!] Please enter a valid number.")
+            on_input()  # Recurse to prompt again
 
-        render_menu()
-
-    print("\nUse UP/DOWN arrows to navigate and ENTER to select.")
     render_menu()
-
-    with keyboard.Listener(on_press=on_press) as listener:
-        listener.join()
+    on_input()
 
 if __name__ == "__main__":
     main()
