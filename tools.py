@@ -90,7 +90,7 @@ def main_menu(stdscr):
     while True:
         stdscr.clear()
         stdscr.addstr("=" * 50 + "\n")
-        stdscr.addstr(" WELCOME TO MTOOL BY iamge01\n")
+        stdscr.addstr("  Welcome to the Tool Selector! Choose an option:\n")
         stdscr.addstr("=" * 50 + "\n")
 
         for i, option in enumerate(menu_options):
@@ -112,7 +112,6 @@ def main_menu(stdscr):
                 download_zphisher()
             elif selected_index == 2:
                 start_cookie_logger()
-            break  # Exit menu loop after selection
 
         stdscr.refresh()
 
